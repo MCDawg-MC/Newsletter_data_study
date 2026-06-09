@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Cart — Performance Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --accent: #2563eb;
+    --accent-light: #dbeafe;
+    --accent-dark: #1d4ed8;
+    --green: #16a34a;
+    --red: #dc2626;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  /* ── layout ── */
+  .page { max-width: 1080px; margin: 0 auto; padding: 0 24px 64px; }
+
+  /* ── header ── */
+  .site-header {
+    background: var(--gray-900);
+    color: #fff;
+    padding: 36px 0 32px;
+    margin-bottom: 40px;
+  }
+  .site-header .page { display: flex; flex-direction: column; gap: 6px; }
+  .header-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: #93c5fd;
+  }
+  .header-title { font-size: 26px; font-weight: 700; }
+  .header-period { font-size: 13px; color: #9ca3af; margin-top: 2px; }
+  .header-summary {
+    margin-top: 12px; font-size: 14px; color: #d1d5db;
+    max-width: 640px; line-height: 1.6;
+  }
+
+  /* ── section wrappers ── */
+  .section { margin-bottom: 40px; }
+  .section-title {
+    font-size: 16px; font-weight: 700; color: var(--gray-900);
+    margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: 12px; color: var(--gray-400); margin-bottom: 16px;
+  }
+  .card {
+    background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 24px;
+  }
+
+  /* ── KPI cards ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .kpi-card {
+    background: #fff; border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px 22px;
+  }
+  .kpi-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--gray-400); margin-bottom: 6px;
+  }
+  .kpi-value { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .kpi-sub {
+    font-size: 12px; color: var(--gray-400); margin-top: 4px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 2px;
+    font-size: 11px; font-weight: 600; padding: 2px 7px;
+    border-radius: 999px;
+  }
+  .badge-up   { background: #dcfce7; color: #15803d; }
+  .badge-down { background: #fee2e2; color: #b91c1c; }
+  .badge-neu  { background: var(--gray-100); color: var(--gray-600); }
+
+  /* ── chart containers ── */
+  .chart-wrap { position: relative; }
+  .chart-wrap canvas { display: block; }
+
+  /* ── two-col layout ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── table ── */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--gray-50); color: var(--gray-600);
+    font-size: 11px; font-weight: 600; letter-spacing: .05em;
+    text-transform: uppercase; padding: 10px 14px; text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  th:hover { color: var(--accent); }
+  th.sorted { color: var(--accent); }
+  th.sorted::after { content: " ↓"; }
+  th.sorted.asc::after { content: " ↑"; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--gray-100); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-50); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .cpm-pill {
+    display: inline-block; background: var(--accent-light); color: var(--accent-dark);
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  }
+
+  /* ── insights ── */
+  .insights-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .insight-item {
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .insight-dot {
+    flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-top: 7px;
+  }
+  .insight-text { font-size: 14px; color: var(--gray-700); line-height: 1.6; }
+  .insight-text strong { color: var(--gray-900); }
+
+  /* ── data quality footer ── */
+  .dq-footer {
+    background: #fff; border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 20px 24px; margin-top: 48px;
+    border-top: 3px solid var(--accent);
+  }
+  .dq-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--gray-400); margin-bottom: 14px;
+  }
+  .dq-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .dq-stat label {
+    display: block; font-size: 11px; color: var(--gray-400);
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px;
+  }
+  .dq-stat .val { font-size: 18px; font-weight: 700; }
+  .dq-note { margin-top: 14px; font-size: 12px; color: var(--gray-400); line-height: 1.6; }
+
+  /* ── caption ── */
+  .caption {
+    font-size: 12.5px; color: var(--gray-600); margin-top: 12px;
+    font-style: italic; line-height: 1.5;
+  }
+
+  /* ── device doughnut row ── */
+  .device-row { display: flex; align-items: center; gap: 32px; }
+  .device-legend { flex: 1; }
+  .device-legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--gray-100);
+  }
+  .device-legend-item:last-child { border-bottom: none; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-pct { font-weight: 700; margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 580px) {
+    .device-row { flex-direction: column; }
+    .kpi-value { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="page">
+    <div class="header-eyebrow">Newsletter Analytics</div>
+    <div class="header-title">The Cart — Performance Report</div>
+    <div class="header-period" id="header-period"></div>
+    <div class="header-summary" id="header-summary"></div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ── KPI ROW ── -->
+  <div class="section">
+    <div class="kpi-grid" id="kpi-grid"></div>
+  </div>
+
+  <!-- ── WEEKLY READERS ── -->
+  <div class="section">
+    <div class="card">
+      <div class="section-title">Weekly Active Readers</div>
+      <div class="section-sub">Active readers per week with 4-week rolling average · Null weeks excluded · Engagement events, not email opens</div>
+      <div class="chart-wrap" style="height:280px">
+        <canvas id="chartWeekly"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TIME SPENT ── -->
+  <div class="section">
+    <div class="card">
+      <div class="section-title">Time Spent per Section</div>
+      <div class="section-sub">Median seconds per section · Bot sessions >30 min excluded · Sorted descending</div>
+      <div class="chart-wrap" style="height:280px">
+        <canvas id="chartTime"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION POPULARITY ── -->
+  <div class="section">
+    <div class="card">
+      <div class="section-title">Section Popularity</div>
+      <div class="section-sub">Distinct readers reached (left bars) and total attention-minutes (right bars) · Canonical sections only</div>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="chartPop"></canvas>
+      </div>
+      <p class="caption" id="ranking-caption"></p>
+    </div>
+  </div>
+
+  <!-- ── DEVICE SPLIT + SPONSORS ── -->
+  <div class="two-col">
+    <div class="section">
+      <div class="card" style="height:100%">
+        <div class="section-title">Device Split</div>
+        <div class="section-sub" id="device-sub"></div>
+        <div class="device-row">
+          <div class="chart-wrap" style="width:160px;height:160px;flex-shrink:0">
+            <canvas id="chartDevice"></canvas>
+          </div>
+          <div class="device-legend" id="device-legend"></div>
+        </div>
+        <p class="caption" id="device-takeaway"></p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="card" style="height:100%">
+        <div class="section-title">Sponsors</div>
+        <div class="section-sub">Total spend, impressions, and CPM across all placements · Click a column header to sort</div>
+        <div class="tbl-wrap">
+          <table id="sponsor-table">
+            <thead>
+              <tr>
+                <th data-col="sponsor" data-type="str">Sponsor</th>
+                <th data-col="total_spend" data-type="num" class="num sorted">Spend</th>
+                <th data-col="total_impressions" data-type="num" class="num">Impressions</th>
+                <th data-col="issues_run" data-type="num" class="num">Issues</th>
+                <th data-col="cpm" data-type="num" class="num">CPM</th>
+              </tr>
+            </thead>
+            <tbody id="sponsor-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── INSIGHTS ── -->
+  <div class="section">
+    <div class="card">
+      <div class="section-title">Key Insights</div>
+      <div class="section-sub">Plain-language findings for sponsors and editorial</div>
+      <ul class="insights-list" id="insights"></ul>
+    </div>
+  </div>
+
+  <!-- ── DATA QUALITY FOOTER ── -->
+  <div class="dq-footer">
+    <div class="dq-title">Data Quality</div>
+    <div class="dq-grid" id="dq-grid"></div>
+    <p class="dq-note" id="dq-note"></p>
+  </div>
+
+</div><!-- /page -->
+
+<script id="main-script">
+// ── HELPERS ────────────────────────────────────────────────────────────────
+
+function fmtK(n) {
+  if (n == null) return "N/A";
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + "k";
+  return n.toLocaleString();
+}
+
+function fmtNum(n, decimals = 0) {
+  if (n == null) return "N/A";
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+function fmtDollar(n) {
+  if (n == null) return "N/A";
+  return "$" + fmtNum(n);
+}
+
+function fmtPct(n) {
+  if (n == null) return "N/A";
+  return n.toFixed(1) + "%";
+}
+
+function fmtSec(secs) {
+  if (secs == null) return "N/A";
+  const m = Math.floor(secs / 60);
+  const s = Math.round(secs % 60);
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
+// ── CHART DEFAULTS ─────────────────────────────────────────────────────────
+const ACCENT   = "#2563eb";
+const ACCENT2  = "#93c5fd";
+const COLORS   = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#0891b2", "#ec4899", "#6b7280"];
+
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+Chart.defaults.font.size   = 12;
+Chart.defaults.color       = "#6b7280";
+
+// ── BOOT ───────────────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  const D = window.__REPORT_DATA__;
+  if (!D) { document.body.innerHTML = "<p style='padding:40px;color:red'>report_data.json not embedded.</p>"; return; }
+
+  buildHeader(D);
+  buildKPIs(D.kpis);
+  buildWeeklyChart(D.weekly_readers);
+  buildTimeChart(D.section_time);
+  buildPopChart(D.section_popularity, D.ranking_caption);
+  buildDeviceChart(D.device_split, D.top_section, D.device_takeaway);
+  buildSponsorTable(D.sponsors);
+  buildInsights(D);
+  buildDQ(D.data_quality);
+});
+
+// ── HEADER ─────────────────────────────────────────────────────────────────
+function buildHeader(D) {
+  const kpi = D.kpis;
+  const start = kpi.reporting_start;
+  const end   = kpi.reporting_end;
+  const fmtDate = s => {
+    const d = new Date(s + "T00:00:00");
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+  document.getElementById("header-period").textContent =
+    `Reporting period: ${fmtDate(start)} – ${fmtDate(end)}`;
+  document.getElementById("header-summary").textContent = D.summary_sentence;
+}
+
+// ── KPI CARDS ──────────────────────────────────────────────────────────────
+function buildKPIs(kpis) {
+  const growthUp   = kpis.growth_pct != null && kpis.growth_pct >= 0;
+  const growthBadge = kpis.growth_pct != null
+    ? `<span class="badge ${growthUp ? "badge-up" : "badge-down"}">${growthUp ? "▲" : "▼"} ${Math.abs(kpis.growth_pct).toFixed(1)}%</span>`
+    : "";
+
+  const openUp = kpis.avg_open_rate != null && kpis.avg_open_rate >= 30;
+  const openBadge = kpis.avg_open_rate != null
+    ? `<span class="badge ${openUp ? "badge-up" : "badge-neu"}">${openUp ? "▲" : "—"} avg</span>`
+    : "";
+
+  const cards = [
+    {
+      label: "Active Readers (Latest Week)",
+      value: fmtK(kpis.latest_active_readers),
+      sub: `4-week avg: ${fmtK(kpis.avg_4w_readers)}`
+    },
+    {
+      label: "Audience Growth",
+      value: kpis.growth_pct != null ? `+${kpis.growth_pct.toFixed(1)}%` : "N/A",
+      sub: `${growthBadge} first to latest week`
+    },
+    {
+      label: "Avg Open Rate",
+      value: fmtPct(kpis.avg_open_rate),
+      sub: `${openBadge} across all issues`
+    },
+    {
+      label: "Total Sponsor Revenue",
+      value: kpis.total_sponsor_spend != null
+        ? "$" + (kpis.total_sponsor_spend / 1e3).toFixed(0) + "k"
+        : "N/A",
+      sub: "all placements combined"
+    },
+    {
+      label: "Reporting Period",
+      value: kpis.reporting_start && kpis.reporting_end
+        ? Math.round((new Date(kpis.reporting_end) - new Date(kpis.reporting_start)) / (7 * 86400000)) + " wks"
+        : "N/A",
+      sub: `${kpis.reporting_start} → ${kpis.reporting_end}`
+    }
+  ];
+
+  const grid = document.getElementById("kpi-grid");
+  grid.innerHTML = cards.map(c => `
+    <div class="kpi-card">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`).join("");
+}
+
+// ── WEEKLY READERS ─────────────────────────────────────────────────────────
+function buildWeeklyChart(rows) {
+  const labels  = rows.map(r => r.week);
+  const readers = rows.map(r => r.active_readers);
+  const rolling = rows.map(r => r.rolling_4w);
+
+  // Find holiday peak (Nov–Dec) and summer dip (Jun–Aug) for annotation
+  const holidayIdx = rows.findIndex(r => r.week >= "2024-11-01" && r.week <= "2024-12-31" && r.active_readers != null);
+  const maxHoliday = rows.reduce((mx, r) =>
+    r.week >= "2024-11-01" && r.week <= "2024-12-31" && r.active_readers > mx.v
+      ? { v: r.active_readers, w: r.week }
+      : mx, { v: 0, w: "" });
+
+  const ctx = document.getElementById("chartWeekly").getContext("2d");
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Active Readers",
+          data: readers,
+          borderColor: ACCENT,
+          backgroundColor: "rgba(37,99,235,.08)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+          pointHoverRadius: 5,
+          borderWidth: 2,
+        },
+        {
+          label: "4-Week Rolling Avg",
+          data: rolling,
+          borderColor: "#f59e0b",
+          borderDash: [5, 4],
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 12, padding: 16 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.raw;
+              return v == null ? `${ctx.dataset.label}: N/A` : `${ctx.dataset.label}: ${fmtNum(v)}`;
+            }
+          }
+        },
+        annotation: {
+          annotations: maxHoliday.w ? {
+            holidayLine: {
+              type: "line",
+              xMin: maxHoliday.w,
+              xMax: maxHoliday.w,
+              borderColor: "#f59e0b",
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              label: {
+                display: true,
+                content: "Holiday peak",
+                position: "start",
+                font: { size: 11 },
+                color: "#92400e",
+                backgroundColor: "rgba(253,230,138,.8)",
+                padding: { x: 5, y: 3 }
+              }
+            }
+          } : {}
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            maxTicksLimit: 12,
+            maxRotation: 0,
+            callback: (_, i) => {
+              const w = labels[i];
+              if (!w) return "";
+              // show month labels only
+              const d = new Date(w + "T00:00:00");
+              return d.getDate() <= 7 ? d.toLocaleDateString("en-US", { month: "short", year: "2-digit" }) : null;
+            }
+          },
+          grid: { color: "#f3f4f6" }
+        },
+        y: {
+          ticks: { callback: v => fmtK(v) },
+          grid: { color: "#f3f4f6" }
+        }
+      }
+    }
+  });
+}
+
+// ── TIME PER SECTION ───────────────────────────────────────────────────────
+function buildTimeChart(rows) {
+  // exclude Other (review) from the main display
+  const filtered = rows.filter(r => r.section !== "Other (review)");
+  const labels   = filtered.map(r => r.section);
+  const values   = filtered.map(r => r.median_seconds);
+  const counts   = filtered.map(r => r.event_count);
+
+  const ctx = document.getElementById("chartTime").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Median seconds",
+        data: values,
+        backgroundColor: labels.map((_, i) => COLORS[i % COLORS.length] + "cc"),
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const secs = ctx.raw;
+              const cnt  = counts[ctx.dataIndex];
+              return [`Time: ${fmtSec(secs)}`, `Events: ${fmtNum(cnt)}`];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { callback: v => fmtSec(v) },
+          grid: { color: "#f3f4f6" }
+        },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ── SECTION POPULARITY ─────────────────────────────────────────────────────
+function buildPopChart(rows, caption) {
+  const canonical = rows.filter(r => r.section !== "Other (review)");
+  const byReach   = [...canonical].sort((a, b) => b.distinct_readers - a.distinct_readers);
+  const byAttn    = [...canonical].sort((a, b) => b.attention_minutes - a.attention_minutes);
+
+  // use reach-sorted order as x-axis order
+  const labels   = byReach.map(r => r.section);
+  const reachVals = byReach.map(r => r.distinct_readers);
+  const attnVals  = byReach.map(r => {
+    const match = canonical.find(x => x.section === byReach[labels.indexOf(r.section)]?.section);
+    return r.attention_minutes;
+  });
+
+  const ctx = document.getElementById("chartPop").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Distinct Readers (reach)",
+          data: reachVals,
+          backgroundColor: ACCENT + "cc",
+          borderRadius: 3,
+          yAxisID: "yReach",
+        },
+        {
+          label: "Attention-Minutes (total)",
+          data: rows.filter(r => r.section !== "Other (review)")
+                    .sort((a, b) => {
+                      const ia = byReach.findIndex(x => x.section === a.section);
+                      const ib = byReach.findIndex(x => x.section === b.section);
+                      return ia - ib;
+                    })
+                    .map(r => r.attention_minutes),
+          backgroundColor: "#10b981cc",
+          borderRadius: 3,
+          yAxisID: "yAttn",
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 12, padding: 16 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              if (ctx.datasetIndex === 0)
+                return `Reach: ${fmtNum(ctx.raw)} readers`;
+              return `Attention: ${fmtNum(ctx.raw, 0)} min`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            maxRotation: 20,
+            callback: (_, i) => {
+              const lbl = labels[i];
+              // shorten long labels
+              const short = { "Deals of the Week": "Deals", "New Arrivals": "New Arrivals",
+                              "Editor's Picks": "Editor's Picks", "Tech & Gadgets": "Tech & Gadgets",
+                              "Home & Living": "Home & Living", "Sponsored Spotlight": "Sponsored",
+                              "Reader Q&A": "Q&A" };
+              return short[lbl] || lbl;
+            }
+          },
+          grid: { display: false }
+        },
+        yReach: {
+          type: "linear", position: "left",
+          ticks: { callback: v => fmtK(v) },
+          grid: { color: "#f3f4f6" },
+          title: { display: true, text: "Readers", font: { size: 11 } }
+        },
+        yAttn: {
+          type: "linear", position: "right",
+          ticks: { callback: v => fmtNum(v) + " min" },
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Attn-Min", font: { size: 11 } }
+        }
+      }
+    }
+  });
+
+  document.getElementById("ranking-caption").textContent = caption;
+}
+
+// ── DEVICE SPLIT ───────────────────────────────────────────────────────────
+function buildDeviceChart(rows, topSection, takeaway) {
+  const DEVICE_COLORS = {
+    desktop: "#2563eb",
+    app:     "#10b981",
+    mobile:  "#f59e0b",
+    tablet:  "#8b5cf6"
+  };
+  const labels = rows.map(r => r.device);
+  const values = rows.map(r => r.share_pct);
+  const colors = rows.map(r => DEVICE_COLORS[r.device] || "#6b7280");
+
+  document.getElementById("device-sub").textContent =
+    `Share of events in "${topSection}" by device · All canonical sections combined`;
+
+  const canvas = document.getElementById("chartDevice");
+  canvas.width  = 160;
+  canvas.height = 160;
+  const ctx = canvas.getContext("2d");
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderWidth: 2,
+        borderColor: "#fff",
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: "62%",
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` }
+        }
+      }
+    }
+  });
+
+  const legend = document.getElementById("device-legend");
+  legend.innerHTML = rows.map(r => `
+    <div class="device-legend-item">
+      <span class="legend-dot" style="background:${DEVICE_COLORS[r.device] || "#6b7280"}"></span>
+      <span style="text-transform:capitalize">${r.device}</span>
+      <span class="legend-pct">${r.share_pct}%</span>
+    </div>`).join("");
+
+  document.getElementById("device-takeaway").textContent = takeaway;
+}
+
+// ── SPONSORS TABLE ─────────────────────────────────────────────────────────
+let sponsorData = [];
+let sortCol     = "total_spend";
+let sortAsc     = false;
+
+function buildSponsorTable(sponsors) {
+  sponsorData = sponsors;
+  renderSponsorTable();
+
+  document.querySelectorAll("#sponsor-table th[data-col]").forEach(th => {
+    th.addEventListener("click", () => {
+      const col  = th.dataset.col;
+      const type = th.dataset.type;
+      if (sortCol === col) {
+        sortAsc = !sortAsc;
+      } else {
+        sortCol = col;
+        sortAsc = type === "str";
+      }
+      document.querySelectorAll("#sponsor-table th").forEach(h => {
+        h.classList.remove("sorted", "asc");
+      });
+      th.classList.add("sorted");
+      if (sortAsc) th.classList.add("asc");
+      renderSponsorTable();
+    });
+  });
+}
+
+function renderSponsorTable() {
+  const sorted = [...sponsorData].sort((a, b) => {
+    const va = a[sortCol], vb = b[sortCol];
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    const cmp = typeof va === "string" ? va.localeCompare(vb) : va - vb;
+    return sortAsc ? cmp : -cmp;
+  });
+
+  const body = document.getElementById("sponsor-body");
+  body.innerHTML = sorted.map(s => `
+    <tr>
+      <td>${s.sponsor}</td>
+      <td class="num">${fmtDollar(s.total_spend)}</td>
+      <td class="num">${fmtNum(s.total_impressions)}</td>
+      <td class="num">${s.issues_run}</td>
+      <td class="num">${s.cpm != null ? `<span class="cpm-pill">$${s.cpm.toFixed(2)}</span>` : "N/A"}</td>
+    </tr>`).join("");
+}
+
+// ── INSIGHTS ───────────────────────────────────────────────────────────────
+function buildInsights(D) {
+  const kpis   = D.kpis;
+  const topSec = D.top_section;
+  const topTime = D.section_time[0];
+  const topSponsor = D.sponsors[0];
+
+  // derive: which section has highest attention but lower reach rank
+  const pop = D.section_popularity.filter(r => r.section !== "Other (review)");
+  const attnTop = [...pop].sort((a, b) => b.attention_minutes - a.attention_minutes)[0];
+  const reachTop = pop[0]; // already sorted by reach
+
+  const mismatch = attnTop.section !== reachTop.section;
+
+  const insights = [
+    `<strong>${topSec}</strong> is the #1 section by both reach and total attention-minutes — the premium placement for sponsors seeking maximum exposure.`,
+    `<strong>${topTime?.section}</strong> earns the longest median session time (${topTime?.median_fmt || "N/A"}), meaning readers who engage are genuinely reading, not skimming.`,
+    mismatch
+      ? `<strong>${attnTop.section}</strong> ranks #1 in total attention but not in reach, suggesting a smaller but highly engaged audience — a strong fit for niche or premium sponsors.`
+      : `Reach and attention rankings align across sections, so high-reach placements also deliver the most total reading time.`,
+    `The newsletter grew <strong>${kpis.growth_pct != null ? "+" + kpis.growth_pct.toFixed(1) + "%" : "N/A"}</strong> over the reporting period. Sponsor CPMs are fixed, so earlier buys lock in pricing before the audience gets larger and rates adjust.`,
+    `<strong>${topSponsor?.sponsor || "Top sponsor"}</strong> ran ${topSponsor?.issues_run || "—"} issues and achieved $${topSponsor?.cpm?.toFixed(2) || "N/A"} CPM — establishing a baseline for future placement negotiations.`
+  ];
+
+  document.getElementById("insights").innerHTML = insights
+    .map(txt => `<li class="insight-item"><div class="insight-dot"></div><div class="insight-text">${txt}</div></li>`)
+    .join("");
+}
+
+// ── DATA QUALITY ───────────────────────────────────────────────────────────
+function buildDQ(dq) {
+  const stats = [
+    { label: "Sends dropped",       val: `${dq.sends_dropped} / ${dq.sends_rows_in}` },
+    { label: "Subscribers dropped", val: `${dq.subs_dropped} / ${dq.subs_rows_in}` },
+    { label: "Engagement dropped",  val: `${dq.engagement_dropped.toLocaleString()} / ${dq.engagement_rows_in.toLocaleString()}` },
+    { label: "Orphan events",       val: `${dq.orphan_rate_pct}%` },
+    { label: "Bot sessions removed",val: `${dq.bot_sessions_removed.toLocaleString()}` },
+    { label: "Unclassified sections",val: `${dq.other_review_pct}% of events` },
+  ];
+
+  document.getElementById("dq-grid").innerHTML = stats
+    .map(s => `<div class="dq-stat"><label>${s.label}</label><div class="val">${s.val}</div></div>`)
+    .join("");
+
+  document.getElementById("dq-note").innerHTML =
+    `<strong>Cleaning notes:</strong> Sends: duplicates kept with most non-null fields; rows missing a parseable date dropped. ` +
+    `Engagement: duplicate event IDs deduplicated (first occurrence kept); IssueIDs normalized from <code>ISS####</code> to <code>ISS-####</code>; ` +
+    `time_on_section >1,800 s treated as bot traffic and excluded from time metrics. ` +
+    `Subscribers: duplicate week rows deduplicated; ISO-week format <code>2024-W09</code> parsed to week-start Monday. ` +
+    `Sections not mapping to the 7 canonical names go to "Other (review)" — count above shows the orphan share. ` +
+    `Sponsor name variants (e.g., <em>BRIGHTHOME / Bright Home / Bright-Home</em>) normalized to a single canonical name before aggregation.`;
+}
+</script>
+
+<!-- ── DATA INJECTION ── replaced by build_report.py ─────────────────────── -->
+<script>
+window.__REPORT_DATA__ = {"kpis": {"latest_active_readers": 356770, "latest_week": "2025-06-23", "avg_4w_readers": 354164, "growth_pct": 80.0, "total_sponsor_spend": 1099000.0, "avg_open_rate": 59.8, "reporting_start": "2024-01-01", "reporting_end": "2025-06-23"}, "summary_sentence": "The Cart grew from 198,210 to 356,770 active readers (+80.0%) over the reporting period, with an average open rate of 59.8% and $1,099,000 in total sponsor revenue.", "weekly_readers": [{"week": "2024-01-01", "active_readers": 198210, "rolling_4w": 198210.0}, {"week": "2024-01-08", "active_readers": 196294, "rolling_4w": 197252.0}, {"week": "2024-01-15", "active_readers": 202788, "rolling_4w": 199097.3}, {"week": "2024-01-22", "active_readers": 210000, "rolling_4w": 201823.0}, {"week": "2024-01-29", "active_readers": 201123, "rolling_4w": 202551.2}, {"week": "2024-02-05", "active_readers": 218196, "rolling_4w": 208026.8}, {"week": "2024-02-12", "active_readers": 232191, "rolling_4w": 215377.5}, {"week": "2024-02-19", "active_readers": 228785, "rolling_4w": 220073.8}, {"week": "2024-02-26", "active_readers": 222407, "rolling_4w": 225394.8}, {"week": "2024-03-04", "active_readers": 231000, "rolling_4w": 228595.8}, {"week": "2024-03-11", "active_readers": 226290, "rolling_4w": 227120.5}, {"week": "2024-03-18", "active_readers": 228195, "rolling_4w": 226973.0}, {"week": "2024-03-25", "active_readers": 235070, "rolling_4w": 230138.8}, {"week": "2024-04-01", "active_readers": 221817, "rolling_4w": 227843.0}, {"week": "2024-04-08", "active_readers": 224994, "rolling_4w": 227519.0}, {"week": "2024-04-15", "active_readers": 235185, "rolling_4w": 229266.5}, {"week": "2024-04-22", "active_readers": 233840, "rolling_4w": 228959.0}, {"week": "2024-04-29", "active_readers": 245408, "rolling_4w": 234856.8}, {"week": "2024-05-06", "active_readers": 238389, "rolling_4w": 238205.5}, {"week": "2024-05-13", "active_readers": 236547, "rolling_4w": 238546.0}, {"week": "2024-05-20", "active_readers": 259907, "rolling_4w": 245062.8}, {"week": "2024-05-27", "active_readers": 249209, "rolling_4w": 246013.0}, {"week": "2024-06-03", "active_readers": 253369, "rolling_4w": 249758.0}, {"week": "2024-06-10", "active_readers": 243914, "rolling_4w": 251599.8}, {"week": "2024-06-17", "active_readers": 252560, "rolling_4w": 249763.0}, {"week": "2024-06-24", "active_readers": 259562, "rolling_4w": 252351.2}, {"week": "2024-07-01", "active_readers": 241583, "rolling_4w": 249404.8}, {"week": "2024-07-08", "active_readers": 254934, "rolling_4w": 252159.8}, {"week": "2024-07-15", "active_readers": 249387, "rolling_4w": 251366.5}, {"week": "2024-07-22", "active_readers": 253595, "rolling_4w": 249874.8}, {"week": "2024-07-29", "active_readers": 253052, "rolling_4w": 252742.0}, {"week": "2024-08-05", "active_readers": 273998, "rolling_4w": 257508.0}, {"week": "2024-08-12", "active_readers": 261338, "rolling_4w": 260495.8}, {"week": "2024-08-19", "active_readers": 255000, "rolling_4w": 260847.0}, {"week": "2024-08-26", "active_readers": 271728, "rolling_4w": 265516.0}, {"week": "2024-09-02", "active_readers": 268000, "rolling_4w": 264016.5}, {"week": "2024-09-09", "active_readers": 281885, "rolling_4w": 269153.2}, {"week": "2024-09-16", "active_readers": 265494, "rolling_4w": 271776.8}, {"week": "2024-09-23", "active_readers": 272708, "rolling_4w": 272021.8}, {"week": "2024-09-30", "active_readers": 287662, "rolling_4w": 276937.2}, {"week": "2024-10-07", "active_readers": 294000, "rolling_4w": 279966.0}, {"week": "2024-10-14", "active_readers": 291360, "rolling_4w": 286432.5}, {"week": "2024-10-21", "active_readers": 290805, "rolling_4w": 290956.8}, {"week": "2024-10-28", "active_readers": 291112, "rolling_4w": 291819.2}, {"week": "2024-11-04", "active_readers": 333465, "rolling_4w": 301685.5}, {"week": "2024-11-11", "active_readers": 343656, "rolling_4w": 314759.5}, {"week": "2024-11-18", "active_readers": 348654, "rolling_4w": 329221.8}, {"week": "2024-11-25", "active_readers": 367123, "rolling_4w": 348224.5}, {"week": "2024-12-02", "active_readers": 362000, "rolling_4w": 355358.2}, {"week": "2024-12-09", "active_readers": 341372, "rolling_4w": 354787.2}, {"week": "2024-12-16", "active_readers": 366261, "rolling_4w": 359189.0}, {"week": "2024-12-23", "active_readers": 360816, "rolling_4w": 357612.2}, {"week": "2024-12-30", "active_readers": 359872, "rolling_4w": 357080.2}, {"week": "2025-01-06", "active_readers": 296665, "rolling_4w": 345903.5}, {"week": "2025-01-20", "active_readers": null, "rolling_4w": 339117.7}, {"week": "2025-01-27", "active_readers": 303183, "rolling_4w": 319906.7}, {"week": "2025-02-03", "active_readers": null, "rolling_4w": 299924.0}, {"week": "2025-02-10", "active_readers": 318060, "rolling_4w": 310621.5}, {"week": "2025-02-17", "active_readers": 334444, "rolling_4w": 318562.3}, {"week": "2025-02-24", "active_readers": 322184, "rolling_4w": 324896.0}, {"week": "2025-03-03", "active_readers": 326999, "rolling_4w": 325421.8}, {"week": "2025-03-17", "active_readers": 319800, "rolling_4w": 325856.8}, {"week": "2025-03-24", "active_readers": 320786, "rolling_4w": 322442.2}, {"week": "2025-03-31", "active_readers": 350319, "rolling_4w": 329476.0}, {"week": "2025-04-07", "active_readers": 337840, "rolling_4w": 332186.2}, {"week": "2025-04-21", "active_readers": 351000, "rolling_4w": 339986.2}, {"week": "2025-04-28", "active_readers": 337749, "rolling_4w": 344227.0}, {"week": "2025-05-12", "active_readers": 350118, "rolling_4w": 344176.8}, {"week": "2025-05-19", "active_readers": 364383, "rolling_4w": 350812.5}, {"week": "2025-05-26", "active_readers": 349883, "rolling_4w": 350533.2}, {"week": "2025-06-02", "active_readers": 369000, "rolling_4w": 358346.0}, {"week": "2025-06-09", "active_readers": 326000, "rolling_4w": 352316.5}, {"week": "2025-06-16", "active_readers": 364884, "rolling_4w": 352441.8}, {"week": "2025-06-23", "active_readers": 356770, "rolling_4w": 354163.5}], "section_time": [{"section": "Deals of the Week", "median_seconds": 78.0, "median_fmt": "1m 18s", "event_count": 5487}, {"section": "Other (review)", "median_seconds": 73.5, "median_fmt": "1m 13s", "event_count": 38}, {"section": "Tech & Gadgets", "median_seconds": 66.0, "median_fmt": "1m 6s", "event_count": 2756}, {"section": "Editor's Picks", "median_seconds": 56.0, "median_fmt": "56s", "event_count": 2543}, {"section": "Home & Living", "median_seconds": 48.0, "median_fmt": "48s", "event_count": 2113}, {"section": "New Arrivals", "median_seconds": 45.0, "median_fmt": "45s", "event_count": 2862}, {"section": "Reader Q&A", "median_seconds": 36.0, "median_fmt": "36s", "event_count": 889}, {"section": "Sponsored Spotlight", "median_seconds": 24.0, "median_fmt": "24s", "event_count": 1532}], "section_popularity": [{"section": "Deals of the Week", "distinct_readers": 5797, "reach_pct": 1.6, "attention_minutes": 8538.1, "reach_rank": 1, "attention_rank": 1}, {"section": "New Arrivals", "distinct_readers": 3054, "reach_pct": 0.9, "attention_minutes": 2567.7, "reach_rank": 2, "attention_rank": 4}, {"section": "Tech & Gadgets", "distinct_readers": 2933, "reach_pct": 0.8, "attention_minutes": 3628.1, "reach_rank": 3, "attention_rank": 2}, {"section": "Editor's Picks", "distinct_readers": 2709, "reach_pct": 0.8, "attention_minutes": 2884.3, "reach_rank": 4, "attention_rank": 3}, {"section": "Home & Living", "distinct_readers": 2244, "reach_pct": 0.6, "attention_minutes": 2028.5, "reach_rank": 5, "attention_rank": 5}, {"section": "Sponsored Spotlight", "distinct_readers": 1642, "reach_pct": 0.5, "attention_minutes": 736.7, "reach_rank": 6, "attention_rank": 6}, {"section": "Reader Q&A", "distinct_readers": 970, "reach_pct": 0.3, "attention_minutes": 644.8, "reach_rank": 7, "attention_rank": 7}, {"section": "Other (review)", "distinct_readers": 40, "reach_pct": 0.0, "attention_minutes": 39.3, "reach_rank": 8, "attention_rank": 8}], "ranking_caption": "Deals of the Week leads on both reach and total attention \u2014 the clear top section.", "top_section": "Deals of the Week", "device_split": [{"device": "desktop", "count": 1509, "share_pct": 25.2}, {"device": "app", "count": 1501, "share_pct": 25.1}, {"device": "mobile", "count": 1491, "share_pct": 24.9}, {"device": "tablet", "count": 1483, "share_pct": 24.8}], "device_takeaway": "Desktop accounts for 25.2% of views in Deals of the Week \u2014 optimize placements for desktop first.", "sponsors": [{"sponsor": "BrightHome", "total_spend": 268000.0, "total_impressions": 2760810, "issues_run": 39, "cpm": 97.07}, {"sponsor": "Volt Electronics", "total_spend": 233000.0, "total_impressions": 2122500, "issues_run": 32, "cpm": 109.78}, {"sponsor": "Pure Wellness Co.", "total_spend": 217500.0, "total_impressions": 2245854, "issues_run": 34, "cpm": 96.85}, {"sponsor": "North Peak Outdoors", "total_spend": 203000.0, "total_impressions": 2050996, "issues_run": 29, "cpm": 98.98}, {"sponsor": "ACME Supplies", "total_spend": 177500.0, "total_impressions": 1826545, "issues_run": 25, "cpm": 97.18}], "data_quality": {"sends_rows_in": 87, "sends_rows_out": 76, "sends_dropped": 11, "subs_rows_in": 82, "subs_rows_out": 74, "subs_dropped": 8, "engagement_rows_in": 20167, "engagement_rows_out": 19773, "engagement_dropped": 394, "sponsors_rows_in": 159, "sponsors_rows_out": 159, "sponsors_dropped": 0, "orphan_events": 411, "orphan_rate_pct": 2.1, "bot_sessions_removed": 369, "other_review_events": 40, "other_review_pct": 0.2}};
+</script>
+
+</body>
+</html>

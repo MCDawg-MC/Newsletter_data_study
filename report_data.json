@@ -1,0 +1,582 @@
+{
+  "kpis": {
+    "latest_active_readers": 356770,
+    "latest_week": "2025-06-23",
+    "avg_4w_readers": 354164,
+    "growth_pct": 80.0,
+    "total_sponsor_spend": 1099000.0,
+    "avg_open_rate": 59.8,
+    "reporting_start": "2024-01-01",
+    "reporting_end": "2025-06-23"
+  },
+  "summary_sentence": "The Cart grew from 198,210 to 356,770 active readers (+80.0%) over the reporting period, with an average open rate of 59.8% and $1,099,000 in total sponsor revenue.",
+  "weekly_readers": [
+    {
+      "week": "2024-01-01",
+      "active_readers": 198210,
+      "rolling_4w": 198210.0
+    },
+    {
+      "week": "2024-01-08",
+      "active_readers": 196294,
+      "rolling_4w": 197252.0
+    },
+    {
+      "week": "2024-01-15",
+      "active_readers": 202788,
+      "rolling_4w": 199097.3
+    },
+    {
+      "week": "2024-01-22",
+      "active_readers": 210000,
+      "rolling_4w": 201823.0
+    },
+    {
+      "week": "2024-01-29",
+      "active_readers": 201123,
+      "rolling_4w": 202551.2
+    },
+    {
+      "week": "2024-02-05",
+      "active_readers": 218196,
+      "rolling_4w": 208026.8
+    },
+    {
+      "week": "2024-02-12",
+      "active_readers": 232191,
+      "rolling_4w": 215377.5
+    },
+    {
+      "week": "2024-02-19",
+      "active_readers": 228785,
+      "rolling_4w": 220073.8
+    },
+    {
+      "week": "2024-02-26",
+      "active_readers": 222407,
+      "rolling_4w": 225394.8
+    },
+    {
+      "week": "2024-03-04",
+      "active_readers": 231000,
+      "rolling_4w": 228595.8
+    },
+    {
+      "week": "2024-03-11",
+      "active_readers": 226290,
+      "rolling_4w": 227120.5
+    },
+    {
+      "week": "2024-03-18",
+      "active_readers": 228195,
+      "rolling_4w": 226973.0
+    },
+    {
+      "week": "2024-03-25",
+      "active_readers": 235070,
+      "rolling_4w": 230138.8
+    },
+    {
+      "week": "2024-04-01",
+      "active_readers": 221817,
+      "rolling_4w": 227843.0
+    },
+    {
+      "week": "2024-04-08",
+      "active_readers": 224994,
+      "rolling_4w": 227519.0
+    },
+    {
+      "week": "2024-04-15",
+      "active_readers": 235185,
+      "rolling_4w": 229266.5
+    },
+    {
+      "week": "2024-04-22",
+      "active_readers": 233840,
+      "rolling_4w": 228959.0
+    },
+    {
+      "week": "2024-04-29",
+      "active_readers": 245408,
+      "rolling_4w": 234856.8
+    },
+    {
+      "week": "2024-05-06",
+      "active_readers": 238389,
+      "rolling_4w": 238205.5
+    },
+    {
+      "week": "2024-05-13",
+      "active_readers": 236547,
+      "rolling_4w": 238546.0
+    },
+    {
+      "week": "2024-05-20",
+      "active_readers": 259907,
+      "rolling_4w": 245062.8
+    },
+    {
+      "week": "2024-05-27",
+      "active_readers": 249209,
+      "rolling_4w": 246013.0
+    },
+    {
+      "week": "2024-06-03",
+      "active_readers": 253369,
+      "rolling_4w": 249758.0
+    },
+    {
+      "week": "2024-06-10",
+      "active_readers": 243914,
+      "rolling_4w": 251599.8
+    },
+    {
+      "week": "2024-06-17",
+      "active_readers": 252560,
+      "rolling_4w": 249763.0
+    },
+    {
+      "week": "2024-06-24",
+      "active_readers": 259562,
+      "rolling_4w": 252351.2
+    },
+    {
+      "week": "2024-07-01",
+      "active_readers": 241583,
+      "rolling_4w": 249404.8
+    },
+    {
+      "week": "2024-07-08",
+      "active_readers": 254934,
+      "rolling_4w": 252159.8
+    },
+    {
+      "week": "2024-07-15",
+      "active_readers": 249387,
+      "rolling_4w": 251366.5
+    },
+    {
+      "week": "2024-07-22",
+      "active_readers": 253595,
+      "rolling_4w": 249874.8
+    },
+    {
+      "week": "2024-07-29",
+      "active_readers": 253052,
+      "rolling_4w": 252742.0
+    },
+    {
+      "week": "2024-08-05",
+      "active_readers": 273998,
+      "rolling_4w": 257508.0
+    },
+    {
+      "week": "2024-08-12",
+      "active_readers": 261338,
+      "rolling_4w": 260495.8
+    },
+    {
+      "week": "2024-08-19",
+      "active_readers": 255000,
+      "rolling_4w": 260847.0
+    },
+    {
+      "week": "2024-08-26",
+      "active_readers": 271728,
+      "rolling_4w": 265516.0
+    },
+    {
+      "week": "2024-09-02",
+      "active_readers": 268000,
+      "rolling_4w": 264016.5
+    },
+    {
+      "week": "2024-09-09",
+      "active_readers": 281885,
+      "rolling_4w": 269153.2
+    },
+    {
+      "week": "2024-09-16",
+      "active_readers": 265494,
+      "rolling_4w": 271776.8
+    },
+    {
+      "week": "2024-09-23",
+      "active_readers": 272708,
+      "rolling_4w": 272021.8
+    },
+    {
+      "week": "2024-09-30",
+      "active_readers": 287662,
+      "rolling_4w": 276937.2
+    },
+    {
+      "week": "2024-10-07",
+      "active_readers": 294000,
+      "rolling_4w": 279966.0
+    },
+    {
+      "week": "2024-10-14",
+      "active_readers": 291360,
+      "rolling_4w": 286432.5
+    },
+    {
+      "week": "2024-10-21",
+      "active_readers": 290805,
+      "rolling_4w": 290956.8
+    },
+    {
+      "week": "2024-10-28",
+      "active_readers": 291112,
+      "rolling_4w": 291819.2
+    },
+    {
+      "week": "2024-11-04",
+      "active_readers": 333465,
+      "rolling_4w": 301685.5
+    },
+    {
+      "week": "2024-11-11",
+      "active_readers": 343656,
+      "rolling_4w": 314759.5
+    },
+    {
+      "week": "2024-11-18",
+      "active_readers": 348654,
+      "rolling_4w": 329221.8
+    },
+    {
+      "week": "2024-11-25",
+      "active_readers": 367123,
+      "rolling_4w": 348224.5
+    },
+    {
+      "week": "2024-12-02",
+      "active_readers": 362000,
+      "rolling_4w": 355358.2
+    },
+    {
+      "week": "2024-12-09",
+      "active_readers": 341372,
+      "rolling_4w": 354787.2
+    },
+    {
+      "week": "2024-12-16",
+      "active_readers": 366261,
+      "rolling_4w": 359189.0
+    },
+    {
+      "week": "2024-12-23",
+      "active_readers": 360816,
+      "rolling_4w": 357612.2
+    },
+    {
+      "week": "2024-12-30",
+      "active_readers": 359872,
+      "rolling_4w": 357080.2
+    },
+    {
+      "week": "2025-01-06",
+      "active_readers": 296665,
+      "rolling_4w": 345903.5
+    },
+    {
+      "week": "2025-01-20",
+      "active_readers": null,
+      "rolling_4w": 339117.7
+    },
+    {
+      "week": "2025-01-27",
+      "active_readers": 303183,
+      "rolling_4w": 319906.7
+    },
+    {
+      "week": "2025-02-03",
+      "active_readers": null,
+      "rolling_4w": 299924.0
+    },
+    {
+      "week": "2025-02-10",
+      "active_readers": 318060,
+      "rolling_4w": 310621.5
+    },
+    {
+      "week": "2025-02-17",
+      "active_readers": 334444,
+      "rolling_4w": 318562.3
+    },
+    {
+      "week": "2025-02-24",
+      "active_readers": 322184,
+      "rolling_4w": 324896.0
+    },
+    {
+      "week": "2025-03-03",
+      "active_readers": 326999,
+      "rolling_4w": 325421.8
+    },
+    {
+      "week": "2025-03-17",
+      "active_readers": 319800,
+      "rolling_4w": 325856.8
+    },
+    {
+      "week": "2025-03-24",
+      "active_readers": 320786,
+      "rolling_4w": 322442.2
+    },
+    {
+      "week": "2025-03-31",
+      "active_readers": 350319,
+      "rolling_4w": 329476.0
+    },
+    {
+      "week": "2025-04-07",
+      "active_readers": 337840,
+      "rolling_4w": 332186.2
+    },
+    {
+      "week": "2025-04-21",
+      "active_readers": 351000,
+      "rolling_4w": 339986.2
+    },
+    {
+      "week": "2025-04-28",
+      "active_readers": 337749,
+      "rolling_4w": 344227.0
+    },
+    {
+      "week": "2025-05-12",
+      "active_readers": 350118,
+      "rolling_4w": 344176.8
+    },
+    {
+      "week": "2025-05-19",
+      "active_readers": 364383,
+      "rolling_4w": 350812.5
+    },
+    {
+      "week": "2025-05-26",
+      "active_readers": 349883,
+      "rolling_4w": 350533.2
+    },
+    {
+      "week": "2025-06-02",
+      "active_readers": 369000,
+      "rolling_4w": 358346.0
+    },
+    {
+      "week": "2025-06-09",
+      "active_readers": 326000,
+      "rolling_4w": 352316.5
+    },
+    {
+      "week": "2025-06-16",
+      "active_readers": 364884,
+      "rolling_4w": 352441.8
+    },
+    {
+      "week": "2025-06-23",
+      "active_readers": 356770,
+      "rolling_4w": 354163.5
+    }
+  ],
+  "section_time": [
+    {
+      "section": "Deals of the Week",
+      "median_seconds": 78.0,
+      "median_fmt": "1m 18s",
+      "event_count": 5487
+    },
+    {
+      "section": "Other (review)",
+      "median_seconds": 73.5,
+      "median_fmt": "1m 13s",
+      "event_count": 38
+    },
+    {
+      "section": "Tech & Gadgets",
+      "median_seconds": 66.0,
+      "median_fmt": "1m 6s",
+      "event_count": 2756
+    },
+    {
+      "section": "Editor's Picks",
+      "median_seconds": 56.0,
+      "median_fmt": "56s",
+      "event_count": 2543
+    },
+    {
+      "section": "Home & Living",
+      "median_seconds": 48.0,
+      "median_fmt": "48s",
+      "event_count": 2113
+    },
+    {
+      "section": "New Arrivals",
+      "median_seconds": 45.0,
+      "median_fmt": "45s",
+      "event_count": 2862
+    },
+    {
+      "section": "Reader Q&A",
+      "median_seconds": 36.0,
+      "median_fmt": "36s",
+      "event_count": 889
+    },
+    {
+      "section": "Sponsored Spotlight",
+      "median_seconds": 24.0,
+      "median_fmt": "24s",
+      "event_count": 1532
+    }
+  ],
+  "section_popularity": [
+    {
+      "section": "Deals of the Week",
+      "distinct_readers": 5797,
+      "reach_pct": 1.6,
+      "attention_minutes": 8538.1,
+      "reach_rank": 1,
+      "attention_rank": 1
+    },
+    {
+      "section": "New Arrivals",
+      "distinct_readers": 3054,
+      "reach_pct": 0.9,
+      "attention_minutes": 2567.7,
+      "reach_rank": 2,
+      "attention_rank": 4
+    },
+    {
+      "section": "Tech & Gadgets",
+      "distinct_readers": 2933,
+      "reach_pct": 0.8,
+      "attention_minutes": 3628.1,
+      "reach_rank": 3,
+      "attention_rank": 2
+    },
+    {
+      "section": "Editor's Picks",
+      "distinct_readers": 2709,
+      "reach_pct": 0.8,
+      "attention_minutes": 2884.3,
+      "reach_rank": 4,
+      "attention_rank": 3
+    },
+    {
+      "section": "Home & Living",
+      "distinct_readers": 2244,
+      "reach_pct": 0.6,
+      "attention_minutes": 2028.5,
+      "reach_rank": 5,
+      "attention_rank": 5
+    },
+    {
+      "section": "Sponsored Spotlight",
+      "distinct_readers": 1642,
+      "reach_pct": 0.5,
+      "attention_minutes": 736.7,
+      "reach_rank": 6,
+      "attention_rank": 6
+    },
+    {
+      "section": "Reader Q&A",
+      "distinct_readers": 970,
+      "reach_pct": 0.3,
+      "attention_minutes": 644.8,
+      "reach_rank": 7,
+      "attention_rank": 7
+    },
+    {
+      "section": "Other (review)",
+      "distinct_readers": 40,
+      "reach_pct": 0.0,
+      "attention_minutes": 39.3,
+      "reach_rank": 8,
+      "attention_rank": 8
+    }
+  ],
+  "ranking_caption": "Deals of the Week leads on both reach and total attention \u2014 the clear top section.",
+  "top_section": "Deals of the Week",
+  "device_split": [
+    {
+      "device": "desktop",
+      "count": 1509,
+      "share_pct": 25.2
+    },
+    {
+      "device": "app",
+      "count": 1501,
+      "share_pct": 25.1
+    },
+    {
+      "device": "mobile",
+      "count": 1491,
+      "share_pct": 24.9
+    },
+    {
+      "device": "tablet",
+      "count": 1483,
+      "share_pct": 24.8
+    }
+  ],
+  "device_takeaway": "Desktop accounts for 25.2% of views in Deals of the Week \u2014 optimize placements for desktop first.",
+  "sponsors": [
+    {
+      "sponsor": "BrightHome",
+      "total_spend": 268000.0,
+      "total_impressions": 2760810,
+      "issues_run": 39,
+      "cpm": 97.07
+    },
+    {
+      "sponsor": "Volt Electronics",
+      "total_spend": 233000.0,
+      "total_impressions": 2122500,
+      "issues_run": 32,
+      "cpm": 109.78
+    },
+    {
+      "sponsor": "Pure Wellness Co.",
+      "total_spend": 217500.0,
+      "total_impressions": 2245854,
+      "issues_run": 34,
+      "cpm": 96.85
+    },
+    {
+      "sponsor": "North Peak Outdoors",
+      "total_spend": 203000.0,
+      "total_impressions": 2050996,
+      "issues_run": 29,
+      "cpm": 98.98
+    },
+    {
+      "sponsor": "ACME Supplies",
+      "total_spend": 177500.0,
+      "total_impressions": 1826545,
+      "issues_run": 25,
+      "cpm": 97.18
+    }
+  ],
+  "data_quality": {
+    "sends_rows_in": 87,
+    "sends_rows_out": 76,
+    "sends_dropped": 11,
+    "subs_rows_in": 82,
+    "subs_rows_out": 74,
+    "subs_dropped": 8,
+    "engagement_rows_in": 20167,
+    "engagement_rows_out": 19773,
+    "engagement_dropped": 394,
+    "sponsors_rows_in": 159,
+    "sponsors_rows_out": 159,
+    "sponsors_dropped": 0,
+    "orphan_events": 411,
+    "orphan_rate_pct": 2.1,
+    "bot_sessions_removed": 369,
+    "other_review_events": 40,
+    "other_review_pct": 0.2
+  }
+}
